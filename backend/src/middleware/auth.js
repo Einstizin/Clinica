@@ -1,5 +1,17 @@
-const jwt=require('jsonwebtoken');
-module.exports=(req,res,next)=>{
-const t=req.headers.authorization;if(!t)return res.sendStatus(401);
-try{req.user=jwt.verify(t,process.env.JWT_SECRET);next();}catch{res.sendStatus(403);}
+const jwt = require('jsonwebtoken');
+
+module.exports = (req, res, next) => {
+  const token = req.headers.authorization;
+
+  if (!token) {
+    return res.status(401).json({ msg: 'Token não enviado' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded;
+    next();
+  } catch (error) {
+    return res.status(403).json({ msg: 'Token inválido' });
+  }
 };
