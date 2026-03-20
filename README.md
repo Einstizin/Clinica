@@ -5,13 +5,6 @@
 
 <img width="1912" height="964" alt="image" src="https://github.com/user-attachments/assets/b80b5385-a365-4443-8c12-ea701a5d78a6" />
 
-
-## Link do sistema (frontend):
-### clinica-d3x5pphdg-dcsgames0801-4391s-projects.vercel.app
-
-## Link da API (backend):
-### clinica-wkzp.onrender.com
-
 # Funcionalidades:
 
 Login e cadastro com verificação
@@ -27,6 +20,14 @@ Integração com clima (OpenWeather)
 Painel administrativo
 
 Integração com MongoDB
+
+
+## Link do sistema (frontend):
+### clinica-d3x5pphdg-dcsgames0801-4391s-projects.vercel.app
+
+## Link da API (backend):
+### clinica-wkzp.onrender.com
+
 
 Observação:
 Sistema online e funcional.
