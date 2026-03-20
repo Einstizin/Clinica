@@ -152,8 +152,8 @@
   <button
     v-if="userRole === 'secretario'"
     class="menu-item"
-    :class="{ active: currentView === 'pacientes' }"
-    @click="currentView = 'pacientes'"
+    :class="{ active: currentView === 'Usuários' }"
+    @click="currentView = 'Usuários'"
   >
     Pacientes
   </button>
