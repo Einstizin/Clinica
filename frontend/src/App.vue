@@ -579,9 +579,8 @@ export default {
     this.carregar()
   } catch (error) {
     alert(error.response?.data?.msg || 'Erro ao agendar consulta')
-  }
-},
-          {
+  },
+       {
             headers: {
               Authorization: this.token
             }
