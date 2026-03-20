@@ -293,8 +293,7 @@
         <strong>Visualização completa</strong>
       </div>
     </div>
-  </section>
-</template>
+
 
               <div class="info-grid">
                 <div class="info-card">
