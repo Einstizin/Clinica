@@ -62,7 +62,26 @@
 
             <button class="primary-btn" @click="login">Entrar</button>
           </section>
+<div class="form-grid">
+  <div class="field">
+    <label>Nome</label>
+    <input v-model="registerName" placeholder="Digite seu nome" />
+  </div>
 
+  <div class="field">
+    <label>Email para cadastro</label>
+    <input v-model="registerEmail" placeholder="Digite seu email" />
+  </div>
+
+  <div class="field">
+    <label>Senha para cadastro</label>
+    <input v-model="registerPassword" type="password" placeholder="Digite sua senha" />
+  </div>
+</div>
+
+<button class="primary-btn secondary-btn" @click="register">
+  Cadastrar usuário
+</button>
           <section class="card appointment-card">
             <h2>Nova Consulta</h2>
 
