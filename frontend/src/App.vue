@@ -214,7 +214,7 @@
                     <input
                       v-model="endereco"
                       placeholder="Endereço preenchido automaticamente"
-                    />
+                   
                   </div>
 
                   <div class="field">
