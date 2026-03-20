@@ -6,7 +6,7 @@
 ### Link da API (backend):
 ### clinica-wkzp.onrender.com
 
-Funcionalidades:
+# Funcionalidades:
 
 Login e cadastro com verificação
 
