@@ -579,21 +579,9 @@ export default {
     this.carregar()
   } catch (error) {
     alert(error.response?.data?.msg || 'Erro ao agendar consulta')
+  }
   },
-       {
-            headers: {
-              Authorization: this.token
-            }
-          }
-        )
-
-        alert('Consulta agendada com sucesso!')
-        this.carregar()
-      } catch (error) {
-        alert(error.response?.data?.msg || 'Erro ao agendar consulta')
-      }
-    },
-
+     
     async carregar() {
       if (!this.token) return
 
