@@ -545,24 +545,48 @@ export default {
     },
 
     async agendar() {
-      if (!this.token) {
-        alert('Faça login antes de agendar')
-        return
-      }
+  if (!this.token) {
+    alert('Faça login antes de agendar')
+    return
+  }
 
-      if (!this.selectedHour) {
-        alert('Selecione um horário')
-        return
-      }
+  if (!this.selectedHour) {
+    alert('Selecione um horário')
+    return
+  }
 
-      try {
-        await api.post(
-          '/appointments',
-          {
-            patientName: this.patientName || this.userName,
-            date: this.buildDate(),
-            address: this.endereco
-          },
+  try {
+    const dateISO = this.buildDate()
+
+    // 🌦️ CONSULTA CLIMA
+    const clima = await api.get('/external/weather/' + dateISO)
+
+    if (clima.data.rain) {
+      alert('⚠️ Atenção: Há previsão de chuva no dia da consulta!')
+    }
+
+    // 📅 CRIAR CONSULTA
+    await api.post(
+      '/appointments',
+      {
+        patientName: this.patientName || this.userName,
+        date: dateISO,
+        address: this.endereco
+      },
+      {
+        headers: {
+          Authorization: this.token
+        }
+      }
+    )
+
+    alert('Consulta agendada com sucesso!')
+    this.carregar()
+
+  } catch (error) {
+    alert(error.response?.data?.msg || 'Erro ao agendar consulta')
+  }
+},
           {
             headers: {
               Authorization: this.token
