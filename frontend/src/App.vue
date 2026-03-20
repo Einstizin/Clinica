@@ -12,15 +12,21 @@
           <div class="auth-tabs">
             <button
               :class="['tab-btn', { active: authMode === 'login' }]"
-              @click="authMode = 'login'"
+              @click="changeAuthMode('login')"
             >
               Entrar
             </button>
             <button
               :class="['tab-btn', { active: authMode === 'register' }]"
-              @click="authMode = 'register'"
+              @click="changeAuthMode('register')"
             >
               Criar conta
+            </button>
+            <button
+              :class="['tab-btn', { active: authMode === 'verify' }]"
+              @click="changeAuthMode('verify')"
+            >
+              Verificar email
             </button>
           </div>
 
@@ -41,16 +47,10 @@
             <button class="main-btn" @click="login">Entrar</button>
           </div>
 
-          <div v-else>
+          <div v-else-if="authMode === 'register'">
             <h2>Criar uma conta</h2>
             <p class="auth-subtitle">Cadastre um novo usuário para acessar o sistema.</p>
-<div class="field">
-  <label>Tipo de usuário</label>
-  <select v-model="registerRole">
-    <option value="paciente">Paciente</option>
-    <option value="secretario">Secretário</option>
-  </select>
-</div>
+
             <div class="field">
               <label>Nome</label>
               <input v-model="registerName" placeholder="Seu nome completo" />
@@ -58,7 +58,11 @@
 
             <div class="field">
               <label>Email</label>
-              <input v-model="registerEmail" type="email" placeholder="seuemail@exemplo.com" />
+              <input
+                v-model="registerEmail"
+                type="email"
+                placeholder="seuemail@exemplo.com"
+              />
             </div>
 
             <div class="field">
@@ -70,7 +74,56 @@
               />
             </div>
 
+            <div class="field">
+              <label>Tipo de usuário</label>
+              <select v-model="registerRole">
+                <option value="paciente">Paciente</option>
+                <option value="secretario">Secretário</option>
+              </select>
+            </div>
+
             <button class="main-btn" @click="register">Criar conta</button>
+
+            <div v-if="temporaryVerificationCode" class="temporary-code-box">
+              <strong>Código temporário de verificação:</strong>
+              <div class="temporary-code">{{ temporaryVerificationCode }}</div>
+              <small>Use esse código na aba "Verificar email".</small>
+            </div>
+          </div>
+
+          <div v-else>
+            <h2>Verificar email</h2>
+            <p class="auth-subtitle">
+              Digite o email e o código de 6 dígitos recebido no cadastro.
+            </p>
+
+            <div class="field">
+              <label>Email</label>
+              <input
+                v-model="verificationEmail"
+                type="email"
+                placeholder="seuemail@exemplo.com"
+              />
+            </div>
+
+            <div class="field">
+              <label>Código de verificação</label>
+              <input
+                v-model="verificationCode"
+                maxlength="6"
+                placeholder="Digite os 6 dígitos"
+              />
+            </div>
+
+            <button class="main-btn" @click="verifyCode">Verificar email</button>
+            <button class="secondary-inline-btn" @click="resendCode">
+              Reenviar código
+            </button>
+
+            <div v-if="temporaryVerificationCode" class="temporary-code-box">
+              <strong>Novo código temporário:</strong>
+              <div class="temporary-code">{{ temporaryVerificationCode }}</div>
+            </div>
           </div>
         </div>
       </div>
@@ -83,7 +136,7 @@
             <div class="brand-icon">+</div>
             <div>
               <h2>Clínica Vida</h2>
-              <p>Gestão de Consultas</p>
+              <p>{{ userRole === 'secretario' ? 'Painel do Secretário' : 'Painel do Paciente' }}</p>
             </div>
           </div>
 
@@ -120,11 +173,17 @@
           <header class="topbar">
             <div>
               <h1>Sistema de Agendamento</h1>
-              <p>Controle de consultas, pacientes e atendimentos</p>
+              <p>
+                {{
+                  userRole === 'secretario'
+                    ? 'Você está visualizando todos os agendamentos da clínica'
+                    : 'Você está visualizando apenas seus agendamentos'
+                }}
+              </p>
             </div>
 
             <div class="topbar-badge">
-              Usuário autenticado
+              {{ userName }} • {{ userRole }}
             </div>
           </header>
 
@@ -176,7 +235,9 @@
                   <VDatePicker v-model="selectedDate" :min-date="new Date()" expanded />
                 </div>
 
-                <button class="main-btn" @click="agendar">Agendar consulta</button>
+                <button class="main-btn schedule-btn" @click="agendar">
+                  Agendar consulta
+                </button>
               </section>
 
               <section class="card full-width">
@@ -192,7 +253,7 @@
                     </div>
 
                     <div class="appointment-body">
-                      <h4>{{ a.patient?.name || patientName || 'Paciente' }}</h4>
+                      <h4>{{ a.patientName || a.patient?.name || 'Paciente' }}</h4>
                       <p>{{ a.address || 'Endereço não informado' }}</p>
                       <small>{{ a.patient?.email || 'Email não disponível' }}</small>
                     </div>
@@ -215,17 +276,17 @@
 
               <div class="info-grid">
                 <div class="info-card">
-                  <span class="info-label">Paciente atual</span>
-                  <strong>{{ patientName || 'Nenhum paciente informado' }}</strong>
+                  <span class="info-label">Usuário logado</span>
+                  <strong>{{ userName || 'Não identificado' }}</strong>
                 </div>
 
                 <div class="info-card">
-                  <span class="info-label">Endereço atual</span>
-                  <strong>{{ endereco || 'Nenhum endereço preenchido' }}</strong>
+                  <span class="info-label">Tipo de usuário</span>
+                  <strong>{{ userRole || 'Não identificado' }}</strong>
                 </div>
 
                 <div class="info-card">
-                  <span class="info-label">Consultas registradas</span>
+                  <span class="info-label">Consultas visíveis</span>
                   <strong>{{ lista.length }}</strong>
                 </div>
               </div>
@@ -252,7 +313,7 @@
                   </thead>
                   <tbody>
                     <tr v-for="a in lista" :key="a._id">
-                      <td>{{ a.patient?.name || patientName || 'Paciente' }}</td>
+                      <td>{{ a.patientName || a.patient?.name || 'Paciente' }}</td>
                       <td>{{ formatOnlyDate(a.date) }}</td>
                       <td>{{ formatOnlyTime(a.date) }}</td>
                       <td>{{ a.address || 'Não informado' }}</td>
@@ -288,20 +349,19 @@ export default {
 
       email: '',
       password: '',
-      
-      userRole: localStorage.getItem('userRole') || '',
-      userName: localStorage.getItem('userName') || '',
 
-      verificationEmail: '',
-      verificationCode: '',
-      showVerificationScreen: false,
-      
-      registerRole: 'paciente',
       registerName: '',
       registerEmail: '',
       registerPassword: '',
+      registerRole: 'paciente',
+
+      verificationEmail: '',
+      verificationCode: '',
+      temporaryVerificationCode: '',
 
       token: localStorage.getItem('token') || '',
+      userRole: localStorage.getItem('userRole') || '',
+      userName: localStorage.getItem('userName') || '',
 
       patientName: '',
       cep: '',
@@ -332,78 +392,90 @@ export default {
   },
 
   methods: {
+    changeAuthMode(mode) {
+      this.authMode = mode
+    },
+
     async register() {
-  try {
-    await api.post('/auth/register', {
-      name: this.registerName,
-      email: this.registerEmail,
-      password: this.registerPassword,
-      role: this.registerRole
-    })
+      try {
+        const response = await api.post('/auth/register', {
+          name: this.registerName,
+          email: this.registerEmail,
+          password: this.registerPassword,
+          role: this.registerRole
+        })
 
-    this.verificationEmail = this.registerEmail
-    this.showVerificationScreen = true
+        this.temporaryVerificationCode = response.data.verificationCode || ''
+        this.verificationEmail = this.registerEmail
+        this.authMode = 'verify'
 
-    alert('Cadastro realizado. Digite o código enviado ao email.')
-  } catch (error) {
-    alert(error.response?.data?.msg || 'Erro ao cadastrar')
-  }
-},
+        alert('Usuário cadastrado com sucesso. Agora verifique o email com o código informado.')
+      } catch (error) {
+        alert(error.response?.data?.msg || 'Erro ao cadastrar usuário')
+      }
+    },
+
     async verifyCode() {
-  try {
-    await api.post('/auth/verify-email-code', {
-      email: this.verificationEmail,
-      code: this.verificationCode
-    })
+      try {
+        await api.post('/auth/verify-email-code', {
+          email: this.verificationEmail,
+          code: this.verificationCode
+        })
 
-    alert('Email verificado com sucesso!')
-    this.showVerificationScreen = false
-    this.authMode = 'login'
-    this.email = this.verificationEmail
-  } catch (error) {
-    alert(error.response?.data?.msg || 'Erro ao verificar código')
-  }
-},
-async verifyCode() {
-  try {
-    await api.post('/auth/verify-email-code', {
-      email: this.verificationEmail,
-      code: this.verificationCode
-    })
+        this.email = this.verificationEmail
+        this.password = this.registerPassword || this.password
+        this.authMode = 'login'
+        this.temporaryVerificationCode = ''
 
-    alert('Email verificado com sucesso!')
-    this.showVerificationScreen = false
-    this.authMode = 'login'
-    this.email = this.verificationEmail
-  } catch (error) {
-    alert(error.response?.data?.msg || 'Erro ao verificar código')
-  }
-},
+        alert('Email verificado com sucesso! Agora faça login.')
+      } catch (error) {
+        alert(error.response?.data?.msg || 'Erro ao verificar código')
+      }
+    },
+
+    async resendCode() {
+      try {
+        const response = await api.post('/auth/resend-verification-code', {
+          email: this.verificationEmail
+        })
+
+        this.temporaryVerificationCode = response.data.verificationCode || ''
+
+        alert('Código reenviado com sucesso.')
+      } catch (error) {
+        alert(error.response?.data?.msg || 'Erro ao reenviar código')
+      }
+    },
+
     async login() {
-  try {
-    const response = await api.post('/auth/login', {
-      email: this.email,
-      password: this.password
-    })
+      try {
+        const response = await api.post('/auth/login', {
+          email: this.email,
+          password: this.password
+        })
 
-    this.token = response.data.token
-    this.userRole = response.data.user.role
-    this.userName = response.data.user.name
+        this.token = response.data.token
+        this.userRole = response.data.user.role
+        this.userName = response.data.user.name
 
-    localStorage.setItem('token', this.token)
-    localStorage.setItem('userRole', this.userRole)
-    localStorage.setItem('userName', this.userName)
+        localStorage.setItem('token', this.token)
+        localStorage.setItem('userRole', this.userRole)
+        localStorage.setItem('userName', this.userName)
 
-    alert('Login realizado com sucesso!')
-    this.carregar()
-  } catch (error) {
-    alert(error.response?.data?.msg || 'Erro ao fazer login')
-  }
-},
+        alert('Login realizado com sucesso!')
+        this.carregar()
+      } catch (error) {
+        alert(error.response?.data?.msg || 'Erro ao fazer login')
+      }
+    },
 
     logout() {
       this.token = ''
+      this.userRole = ''
+      this.userName = ''
       localStorage.removeItem('token')
+      localStorage.removeItem('userRole')
+      localStorage.removeItem('userName')
       this.currentView = 'agenda'
     },
 
@@ -453,6 +525,7 @@ async verifyCode() {
         await api.post(
           '/appointments',
           {
+            patientName: this.patientName || this.userName,
             date: this.buildDate(),
             address: this.endereco
           },
@@ -466,7 +539,7 @@ async verifyCode() {
         alert('Consulta agendada com sucesso!')
         this.carregar()
       } catch (error) {
-        alert('Erro ao agendar consulta')
+        alert(error.response?.data?.msg || 'Erro ao agendar consulta')
       }
     },
 
@@ -564,7 +637,7 @@ body {
 
 .auth-card {
   width: 100%;
-  max-width: 420px;
+  max-width: 430px;
   background: #ffffff;
   border: 1px solid #d0d7de;
   border-radius: 12px;
@@ -574,7 +647,7 @@ body {
 
 .auth-tabs {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, 1fr);
   gap: 8px;
   margin-bottom: 24px;
 }
@@ -584,9 +657,10 @@ body {
   background: #f6f8fa;
   color: #24292f;
   border-radius: 8px;
-  padding: 10px 14px;
+  padding: 10px 12px;
   font-weight: 600;
   cursor: pointer;
+  font-size: 13px;
 }
 
 .tab-btn.active {
@@ -651,6 +725,34 @@ select:focus {
 
 .main-btn:hover {
   background: #1a7f37;
+}
+
+.secondary-inline-btn {
+  width: 100%;
+  border: 1px solid #d0d7de;
+  background: #f6f8fa;
+  color: #24292f;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+.temporary-code-box {
+  margin-top: 16px;
+  padding: 14px;
+  background: #fff8c5;
+  border: 1px solid #eac54f;
+  border-radius: 10px;
+}
+
+.temporary-code {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 6px;
+  margin: 8px 0;
 }
 
 .app-shell {
@@ -826,6 +928,10 @@ input[readonly] {
   margin-bottom: 10px;
   font-weight: 600;
   color: #334155;
+}
+
+.schedule-btn {
+  margin-top: 20px;
 }
 
 .pill {
