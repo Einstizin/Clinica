@@ -58,7 +58,7 @@
 
             <div class="field full">
               <label>Endereço</label>
-              <input v-model="endereco" placeholder="Endereço preenchido automaticamente" />
+           <input v-model="endereco" placeholder="Endereço preenchido automaticamente" />
             </div>
 
             <div class="field">
@@ -73,7 +73,7 @@
 
             <div class="field">
               <label>Data escolhida</label>
-              <input :value="formattedSelectedDate" disabled />
+              <input :value="formattedSelectedDate" readonly />
             </div>
           </div>
 
