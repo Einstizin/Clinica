@@ -231,6 +231,22 @@ registerPassword: '',
     }
   },
   methods: {
+    async register() {
+  try {
+    await api.post('/auth/register', {
+      name: this.registerName,
+      email: this.registerEmail,
+      password: this.registerPassword,
+      role: 'paciente'
+    })
+
+    alert('Usuário cadastrado com sucesso!')
+    this.email = this.registerEmail
+    this.password = this.registerPassword
+  } catch (e) {
+    alert('Erro ao cadastrar usuário')
+  }
+},
     async login() {
       try {
         const r = await api.post('/auth/login', {
