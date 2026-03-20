@@ -23,11 +23,10 @@ Integração com MongoDB
 
 
 ## Link do sistema (frontend):
-### clinica-d3x5pphdg-dcsgames0801-4391s-projects.vercel.app
+### https://clinica-d3x5pphdg-dcsgames0801-4391s-projects.vercel.app/
 
 ## Link da API (backend):
-### clinica-wkzp.onrender.com
-
+### https://clinica-wkzp.onrender.com
 
 ## Observação:
 ###Sistema online e funcional.
