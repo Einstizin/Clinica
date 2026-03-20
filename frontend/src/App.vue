@@ -198,6 +198,9 @@ const api = axios.create({
 
 export default {
   data() {
+    registerName: '',
+registerEmail: '',
+registerPassword: '',
     return {
       currentView: 'agenda',
       email: '',
