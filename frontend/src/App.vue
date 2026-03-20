@@ -291,6 +291,10 @@ export default {
       
       userRole: localStorage.getItem('userRole') || '',
       userName: localStorage.getItem('userName') || '',
+
+      verificationEmail: '',
+      verificationCode: '',
+      showVerificationScreen: false,
       
       registerRole: 'paciente',
       registerName: '',
@@ -330,26 +334,51 @@ export default {
   methods: {
     async register() {
   try {
-    const response = await api.post('/auth/register', {
+    await api.post('/auth/register', {
       name: this.registerName,
       email: this.registerEmail,
       password: this.registerPassword,
       role: this.registerRole
     })
 
-    alert(
-      'Usuário cadastrado com sucesso! Verifique o email usando este token: ' +
-      response.data.verificationToken
-    )
+    this.verificationEmail = this.registerEmail
+    this.showVerificationScreen = true
 
-    this.authMode = 'login'
-    this.email = this.registerEmail
-    this.password = this.registerPassword
+    alert('Cadastro realizado. Digite o código enviado ao email.')
   } catch (error) {
-    alert(error.response?.data?.msg || 'Erro ao cadastrar usuário')
+    alert(error.response?.data?.msg || 'Erro ao cadastrar')
   }
 },
+    async verifyCode() {
+  try {
+    await api.post('/auth/verify-email-code', {
+      email: this.verificationEmail,
+      code: this.verificationCode
+    })
 
+    alert('Email verificado com sucesso!')
+    this.showVerificationScreen = false
+    this.authMode = 'login'
+    this.email = this.verificationEmail
+  } catch (error) {
+    alert(error.response?.data?.msg || 'Erro ao verificar código')
+  }
+},
+async verifyCode() {
+  try {
+    await api.post('/auth/verify-email-code', {
+      email: this.verificationEmail,
+      code: this.verificationCode
+    })
+
+    alert('Email verificado com sucesso!')
+    this.showVerificationScreen = false
+    this.authMode = 'login'
+    this.email = this.verificationEmail
+  } catch (error) {
+    alert(error.response?.data?.msg || 'Erro ao verificar código')
+  }
+},
     async login() {
   try {
     const response = await api.post('/auth/login', {
