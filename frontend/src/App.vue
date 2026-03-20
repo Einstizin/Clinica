@@ -211,7 +211,7 @@
 
                   <div class="field full">
                     <label>Endereço</label>
-                      <input v-model="endereco" placeholder="Endereço preenchido automaticamente"/>
+                      <input v-model="endereco" placeholder="Endereço preenchido automaticamente" />
                   </div>
 
                   <div class="field">
