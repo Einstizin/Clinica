@@ -42,3 +42,42 @@ router.post('/register', async (req, res) => {
     });
   }
 });
+router.post('/verify-email-code', async (req, res) => {
+  try {
+    const { email, code } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ msg: 'Usuário não encontrado' });
+    }
+
+    if (user.emailVerified) {
+      return res.json({ msg: 'Email já verificado' });
+    }
+
+    if (!user.emailVerificationCode || !user.emailVerificationExpires) {
+      return res.status(400).json({ msg: 'Nenhum código ativo encontrado' });
+    }
+
+    if (user.emailVerificationExpires < new Date()) {
+      return res.status(400).json({ msg: 'Código expirado' });
+    }
+
+    if (user.emailVerificationCode !== code) {
+      return res.status(400).json({ msg: 'Código inválido' });
+    }
+
+    user.emailVerified = true;
+    user.emailVerificationCode = null;
+    user.emailVerificationExpires = null;
+    await user.save();
+
+    return res.json({ msg: 'Email verificado com sucesso' });
+  } catch (error) {
+    return res.status(500).json({
+      msg: 'Erro ao verificar código',
+      error: error.message
+    });
+  }
+});
