@@ -370,7 +370,7 @@ export default {
   } catch (error) {
     alert(error.response?.data?.msg || 'Erro ao fazer login')
   }
-}
+},
 
     logout() {
       this.token = ''
