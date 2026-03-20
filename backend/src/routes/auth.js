@@ -81,3 +81,33 @@ router.post('/verify-email-code', async (req, res) => {
     });
   }
 });
+router.post('/resend-verification-code', async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await User.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ msg: 'Usuário não encontrado' });
+    }
+
+    if (user.emailVerified) {
+      return res.status(400).json({ msg: 'Email já verificado' });
+    }
+
+    const code = generateCode();
+
+    user.emailVerificationCode = code;
+    user.emailVerificationExpires = new Date(Date.now() + 10 * 60 * 1000);
+    await user.save();
+
+    await sendVerificationCode(user.email, user.name, code);
+
+    return res.json({ msg: 'Código reenviado com sucesso' });
+  } catch (error) {
+    return res.status(500).json({
+      msg: 'Erro ao reenviar código',
+      error: error.message
+    });
+  }
+});
