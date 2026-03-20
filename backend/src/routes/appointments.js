@@ -27,13 +27,17 @@ router.post('/', auth, async (req, res) => {
 
     const appointment = await Appointment.create({
       patient: req.user.id,
+      patientName: req.body.patientName || req.user.name || 'Paciente',
       date: appointmentDate,
-      address: req.body.address
+      address: req.body.address || ''
     });
 
     return res.json(appointment);
   } catch (error) {
-    return res.status(500).json({ msg: 'Erro ao criar consulta', error: error.message });
+    return res.status(500).json({
+      msg: 'Erro ao criar consulta',
+      error: error.message
+    });
   }
 });
 
@@ -42,16 +46,23 @@ router.get('/', auth, async (req, res) => {
     let appointments;
 
     if (req.user.role === 'secretario') {
-      appointments = await Appointment.find().populate('patient');
+      appointments = await Appointment.find()
+        .populate('patient')
+        .sort({ date: 1 });
     } else {
       appointments = await Appointment.find({
         patient: req.user.id
-      }).populate('patient');
+      })
+        .populate('patient')
+        .sort({ date: 1 });
     }
 
     return res.json(appointments);
   } catch (error) {
-    return res.status(500).json({ msg: 'Erro ao listar consultas', error: error.message });
+    return res.status(500).json({
+      msg: 'Erro ao listar consultas',
+      error: error.message
+    });
   }
 });
 
