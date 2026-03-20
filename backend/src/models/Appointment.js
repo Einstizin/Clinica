@@ -1,4 +1,29 @@
-const m=require('mongoose');
-module.exports=m.model('Appointment',new m.Schema({
-patient:{type:m.Schema.Types.ObjectId,ref:'User'},date:Date,address:String
-}));
+const mongoose = require('mongoose');
+
+module.exports = mongoose.model(
+  'Appointment',
+  new mongoose.Schema(
+    {
+      patient: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+      },
+      patientName: {
+        type: String,
+        default: ''
+      },
+      date: {
+        type: Date,
+        required: true
+      },
+      address: {
+        type: String,
+        default: ''
+      }
+    },
+    {
+      timestamps: true
+    }
+  )
+);
