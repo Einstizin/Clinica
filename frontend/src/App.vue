@@ -580,7 +580,7 @@ export default {
   } catch (error) {
     alert(error.response?.data?.msg || 'Erro ao agendar consulta')
   }
-}
+},
           {
             headers: {
               Authorization: this.token
