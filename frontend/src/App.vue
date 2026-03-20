@@ -552,7 +552,14 @@ input[readonly] {
   align-items: center;
   justify-content: space-between;
 }
+.secondary-btn {
+  background: #0f766e;
+  margin-left: 10px;
+}
 
+.secondary-btn:hover {
+  background: #0b5f59;
+}
 .badge {
   background: #dbeafe;
   color: #1d4ed8;
