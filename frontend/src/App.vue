@@ -20,17 +20,17 @@ export default{
 data(){return{email:'',password:'',token:'',date:'',cep:'',endereco:'',lista:[]}},
 methods:{
 async login(){
-const r=await axios.post('http://localhost:3000/auth/login',{email:this.email,password:this.password});
+const r=await axios.post('https://clinica-wkzp.onrender.com/auth/login',{email:this.email,password:this.password});
 this.token=r.data.token;},
 async agendar(){
-await axios.post('http://localhost:3000/appointments',{date:this.date,address:this.endereco},{
+await axios.post('https://clinica-wkzp.onrender.com/appointments',{date:this.date,address:this.endereco},{
 headers:{Authorization:this.token}});
 alert('ok');this.carregar();},
 async carregar(){
-const r=await axios.get('http://localhost:3000/appointments',{headers:{Authorization:this.token}});
+const r=await axios.get('https://clinica-wkzp.onrender.com/appointments',{headers:{Authorization:this.token}});
 this.lista=r.data;},
 async buscarCep(){
-const r=await axios.get('http://localhost:3000/external/cep/'+this.cep);
+const r=await axios.get('https://clinica-wkzp.onrender.com/external/cep/'+this.cep);
 this.endereco=r.data.logradouro;}
 },
 mounted(){this.carregar();}
