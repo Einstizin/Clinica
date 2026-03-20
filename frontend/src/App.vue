@@ -10,9 +10,29 @@
       </div>
 
       <nav class="menu">
-        <button class="menu-item active">Agenda</button>
-        <button class="menu-item">Pacientes</button>
-        <button class="menu-item">Atendimentos</button>
+        <button
+          class="menu-item"
+          :class="{ active: currentView === 'agenda' }"
+          @click="currentView = 'agenda'"
+        >
+          Agenda
+        </button>
+
+        <button
+          class="menu-item"
+          :class="{ active: currentView === 'pacientes' }"
+          @click="currentView = 'pacientes'"
+        >
+          Pacientes
+        </button>
+
+        <button
+          class="menu-item"
+          :class="{ active: currentView === 'atendimentos' }"
+          @click="currentView = 'atendimentos'"
+        >
+          Atendimentos
+        </button>
       </nav>
     </aside>
 
@@ -24,93 +44,128 @@
         </div>
       </header>
 
-      <div class="dashboard">
-        <section class="card login-card">
-          <h2>Login</h2>
-          <div class="form-grid">
-            <div class="field">
-              <label>Email</label>
-              <input v-model="email" placeholder="Digite seu email" />
-            </div>
-
-            <div class="field">
-              <label>Senha</label>
-              <input v-model="password" type="password" placeholder="Digite sua senha" />
-            </div>
-          </div>
-
-          <button class="primary-btn" @click="login">Entrar</button>
-        </section>
-
-        <section class="card appointment-card">
-          <h2>Nova Consulta</h2>
-
-          <div class="form-grid two-columns">
-            <div class="field">
-              <label>Paciente</label>
-              <input v-model="patientName" placeholder="Nome do paciente" />
-            </div>
-
-            <div class="field">
-              <label>CEP</label>
-              <input v-model="cep" placeholder="Digite o CEP" @blur="buscarCep" />
-            </div>
-
-            <div class="field full">
-              <label>Endereço</label>
-           <input v-model="endereco" placeholder="Endereço preenchido automaticamente" />
-            </div>
-
-            <div class="field">
-              <label>Hora</label>
-              <select v-model="selectedHour">
-                <option disabled value="">Selecione o horário</option>
-                <option v-for="hour in availableHours" :key="hour" :value="hour">
-                  {{ hour }}
-                </option>
-              </select>
-            </div>
-
-            <div class="field">
-              <label>Data escolhida</label>
-              <input :value="formattedSelectedDate" readonly />
-            </div>
-          </div>
-
-          <div class="calendar-box">
-            <label class="calendar-label">Escolha a data da consulta</label>
-            <VDatePicker v-model="selectedDate" :min-date="new Date()" expanded />
-          </div>
-
-          <div class="actions">
-            <button class="primary-btn" @click="agendar">Agendar Consulta</button>
-          </div>
-        </section>
-
-        <section class="card schedule-card">
-          <div class="card-header">
-            <h2>Agenda</h2>
-            <span class="badge">{{ lista.length }} consulta(s)</span>
-          </div>
-
-          <div v-if="lista.length" class="appointment-list">
-            <div v-for="a in lista" :key="a._id" class="appointment-item">
-              <div class="appointment-time">
-                {{ formatDate(a.date) }}
+      <template v-if="currentView === 'agenda'">
+        <div class="dashboard">
+          <section class="card login-card">
+            <h2>Login</h2>
+            <div class="form-grid">
+              <div class="field">
+                <label>Email</label>
+                <input v-model="email" placeholder="Digite seu email" />
               </div>
-              <div class="appointment-info">
-                <strong>{{ a.patient?.name || patientName || 'Paciente' }}</strong>
-                <p>{{ a.address || 'Endereço não informado' }}</p>
-                <small>{{ a.patient?.email || 'Sem email cadastrado' }}</small>
+
+              <div class="field">
+                <label>Senha</label>
+                <input v-model="password" type="password" placeholder="Digite sua senha" />
               </div>
             </div>
-          </div>
 
-          <div v-else class="empty-state">
-            Nenhuma consulta encontrada.
+            <button class="primary-btn" @click="login">Entrar</button>
+          </section>
+
+          <section class="card appointment-card">
+            <h2>Nova Consulta</h2>
+
+            <div class="form-grid two-columns">
+              <div class="field">
+                <label>Paciente</label>
+                <input v-model="patientName" placeholder="Nome do paciente" />
+              </div>
+
+              <div class="field">
+                <label>CEP</label>
+                <input v-model="cep" placeholder="Digite o CEP" @blur="buscarCep" />
+              </div>
+
+              <div class="field full">
+                <label>Endereço</label>
+                <input
+                  v-model="endereco"
+                  placeholder="Endereço preenchido automaticamente, mas pode ser editado"
+                />
+              </div>
+
+              <div class="field">
+                <label>Hora</label>
+                <select v-model="selectedHour">
+                  <option disabled value="">Selecione o horário</option>
+                  <option v-for="hour in availableHours" :key="hour" :value="hour">
+                    {{ hour }}
+                  </option>
+                </select>
+              </div>
+
+              <div class="field">
+                <label>Data escolhida</label>
+                <input :value="formattedSelectedDate" readonly />
+              </div>
+            </div>
+
+            <div class="calendar-box">
+              <label class="calendar-label">Escolha a data da consulta</label>
+              <VDatePicker v-model="selectedDate" :min-date="new Date()" expanded />
+            </div>
+
+            <div class="actions">
+              <button class="primary-btn" @click="agendar">Agendar Consulta</button>
+            </div>
+          </section>
+
+          <section class="card schedule-card">
+            <div class="card-header">
+              <h2>Agenda</h2>
+              <span class="badge">{{ lista.length }} consulta(s)</span>
+            </div>
+
+            <div v-if="lista.length" class="appointment-list">
+              <div v-for="a in lista" :key="a._id" class="appointment-item">
+                <div class="appointment-time">
+                  {{ formatDate(a.date) }}
+                </div>
+                <div class="appointment-info">
+                  <strong>{{ a.patient?.name || patientName || 'Paciente' }}</strong>
+                  <p>{{ a.address || 'Endereço não informado' }}</p>
+                  <small>{{ a.patient?.email || 'Sem email cadastrado' }}</small>
+                </div>
+              </div>
+            </div>
+
+            <div v-else class="empty-state">
+              Nenhuma consulta encontrada.
+            </div>
+          </section>
+        </div>
+      </template>
+
+      <template v-else-if="currentView === 'pacientes'">
+        <section class="card full-section">
+          <h2>Pacientes</h2>
+          <p class="section-text">
+            Aqui você pode futuramente cadastrar, editar e visualizar pacientes.
+          </p>
+
+          <div class="info-box">
+            <strong>Paciente informado no formulário:</strong>
+            <p>{{ patientName || 'Nenhum paciente informado ainda' }}</p>
+            <p><strong>CEP:</strong> {{ cep || 'Não informado' }}</p>
+            <p><strong>Endereço:</strong> {{ endereco || 'Nenhum endereço preenchido' }}</p>
           </div>
         </section>
-      </div>
+      </template>
+
+      <template v-else-if="currentView === 'atendimentos'">
+        <section class="card full-section">
+          <h2>Atendimentos</h2>
+          <p class="section-text">
+            Esta área pode mostrar histórico de atendimentos, status e observações.
+          </p>
+
+          <div class="info-box">
+            <strong>Total de consultas agendadas:</strong>
+            <p>{{ lista.length }}</p>
+          </div>
+        </section>
+      </template>
     </main>
   </div>
 </template>
@@ -125,6 +180,7 @@ const api = axios.create({
 export default {
   data() {
     return {
+      currentView: 'agenda',
       email: '',
       password: '',
       token: localStorage.getItem('token') || '',
@@ -314,6 +370,7 @@ body {
   border-radius: 12px;
   cursor: pointer;
   font-size: 15px;
+  transition: 0.2s;
 }
 
 .menu-item.active,
@@ -358,12 +415,12 @@ body {
   height: fit-content;
 }
 
-.appointment-card {
-  grid-column: span 1;
-}
-
 .schedule-card {
   grid-column: 1 / -1;
+}
+
+.full-section {
+  width: 100%;
 }
 
 .card h2 {
@@ -413,6 +470,13 @@ input:focus,
 select:focus {
   border-color: #2563eb;
   background: white;
+}
+
+input[readonly] {
+  background: #f8fafc;
+  color: #334155;
+  cursor: default;
+  opacity: 1;
 }
 
 .primary-btn {
@@ -496,6 +560,18 @@ select:focus {
   color: #64748b;
   border: 1px dashed #cbd5e1;
   border-radius: 14px;
+  background: #f8fafc;
+}
+
+.section-text {
+  color: #64748b;
+  margin-bottom: 18px;
+}
+
+.info-box {
+  border: 1px solid #dbe3ee;
+  border-radius: 14px;
+  padding: 18px;
   background: #f8fafc;
 }
 
