@@ -65,5 +65,23 @@ router.get('/', auth, async (req, res) => {
     });
   }
 });
+router.delete('/:id', auth, async (req, res) => {
+  try {
+    if (req.user.role !== 'secretario') {
+      return res.status(403).json({
+        msg: 'Apenas secretários podem cancelar consultas'
+      });
+    }
+
+    await Appointment.findByIdAndDelete(req.params.id);
+
+    return res.json({ msg: 'Consulta cancelada com sucesso' });
+  } catch (error) {
+    return res.status(500).json({
+      msg: 'Erro ao cancelar consulta',
+      error: error.message
+    });
+  }
+});
 
 module.exports = router;
