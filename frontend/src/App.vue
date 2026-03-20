@@ -44,7 +44,13 @@
           <div v-else>
             <h2>Criar uma conta</h2>
             <p class="auth-subtitle">Cadastre um novo usuário para acessar o sistema.</p>
-
+<div class="field">
+  <label>Tipo de usuário</label>
+  <select v-model="registerRole">
+    <option value="paciente">Paciente</option>
+    <option value="secretario">Secretário</option>
+  </select>
+</div>
             <div class="field">
               <label>Nome</label>
               <input v-model="registerName" placeholder="Seu nome completo" />
@@ -282,7 +288,11 @@ export default {
 
       email: '',
       password: '',
-
+      
+      userRole: localStorage.getItem('userRole') || '',
+      userName: localStorage.getItem('userName') || '',
+      
+      registerRole: 'paciente',
       registerName: '',
       registerEmail: '',
       registerPassword: '',
@@ -319,40 +329,48 @@ export default {
 
   methods: {
     async register() {
-      try {
-        await api.post('/auth/register', {
-          name: this.registerName,
-          email: this.registerEmail,
-          password: this.registerPassword,
-          role: 'paciente'
-        })
+  try {
+    const response = await api.post('/auth/register', {
+      name: this.registerName,
+      email: this.registerEmail,
+      password: this.registerPassword,
+      role: this.registerRole
+    })
 
-        this.email = this.registerEmail
-        this.password = this.registerPassword
-        this.authMode = 'login'
+    alert(
+      'Usuário cadastrado com sucesso! Verifique o email usando este token: ' +
+      response.data.verificationToken
+    )
 
-        alert('Usuário cadastrado com sucesso!')
-      } catch (error) {
-        alert('Erro ao cadastrar usuário')
-      }
-    },
+    this.authMode = 'login'
+    this.email = this.registerEmail
+    this.password = this.registerPassword
+  } catch (error) {
+    alert(error.response?.data?.msg || 'Erro ao cadastrar usuário')
+  }
+},
 
     async login() {
-      try {
-        const response = await api.post('/auth/login', {
-          email: this.email,
-          password: this.password
-        })
+  try {
+    const response = await api.post('/auth/login', {
+      email: this.email,
+      password: this.password
+    })
 
-        this.token = response.data.token
-        localStorage.setItem('token', this.token)
+    this.token = response.data.token
+    this.userRole = response.data.user.role
+    this.userName = response.data.user.name
 
-        alert('Login realizado com sucesso!')
-        this.carregar()
-      } catch (error) {
-        alert('Erro ao fazer login')
-      }
-    },
+    localStorage.setItem('token', this.token)
+    localStorage.setItem('userRole', this.userRole)
+    localStorage.setItem('userName', this.userName)
+
+    alert('Login realizado com sucesso!')
+    this.carregar()
+  } catch (error) {
+    alert(error.response?.data?.msg || 'Erro ao fazer login')
+  }
+}
 
     logout() {
       this.token = ''
