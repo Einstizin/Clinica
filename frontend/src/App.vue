@@ -141,30 +141,31 @@
           </div>
 
           <nav class="menu">
-            <button
-              class="menu-item"
-              :class="{ active: currentView === 'agenda' }"
-              @click="currentView = 'agenda'"
-            >
-              Agenda
-            </button>
+  <button
+    class="menu-item"
+    :class="{ active: currentView === 'agenda' }"
+    @click="currentView = 'agenda'"
+  >
+    {{ userRole === 'secretario' ? 'Gerenciar Agenda' : 'Agendar Consulta' }}
+  </button>
 
-            <button
-              class="menu-item"
-              :class="{ active: currentView === 'pacientes' }"
-              @click="currentView = 'pacientes'"
-            >
-              Pacientes
-            </button>
+  <button
+    v-if="userRole === 'secretario'"
+    class="menu-item"
+    :class="{ active: currentView === 'pacientes' }"
+    @click="currentView = 'pacientes'"
+  >
+    Pacientes
+  </button>
 
-            <button
-              class="menu-item"
-              :class="{ active: currentView === 'atendimentos' }"
-              @click="currentView = 'atendimentos'"
-            >
-              Atendimentos
-            </button>
-          </nav>
+  <button
+    class="menu-item"
+    :class="{ active: currentView === 'atendimentos' }"
+    @click="currentView = 'atendimentos'"
+  >
+    {{ userRole === 'secretario' ? 'Todos Atendimentos' : 'Meus Atendimentos' }}
+  </button>
+</nav>
 
           <button class="logout-btn" @click="logout">Sair</button>
         </aside>
@@ -191,7 +192,9 @@
             <div class="grid-layout">
               <section class="card">
                 <div class="section-header">
-                  <h2>Nova Consulta</h2>
+                  <h2>
+                    {{ userRole === 'secretario' ? 'Gerenciar Consultas' : 'Nova Consulta' }}
+                  </h2>
                   <span class="muted">Agendamento</span>
                 </div>
 
@@ -267,12 +270,31 @@
             </div>
           </template>
 
-          <template v-else-if="currentView === 'pacientes'">
-            <section class="card">
-              <div class="section-header">
-                <h2>Pacientes</h2>
-                <span class="muted">Informações gerais</span>
-              </div>
+          <template v-else-if="currentView === 'pacientes' && userRole === 'secretario'">
+  <section class="card">
+    <div class="section-header">
+      <h2>Pacientes</h2>
+      <span class="muted">Área administrativa</span>
+    </div>
+
+    <div class="info-grid">
+      <div class="info-card">
+        <span class="info-label">Modo do sistema</span>
+        <strong>Secretário</strong>
+      </div>
+
+      <div class="info-card">
+        <span class="info-label">Consultas carregadas</span>
+        <strong>{{ lista.length }}</strong>
+      </div>
+
+      <div class="info-card">
+        <span class="info-label">Controle</span>
+        <strong>Visualização completa</strong>
+      </div>
+    </div>
+  </section>
+</template>
 
               <div class="info-grid">
                 <div class="info-card">
@@ -297,20 +319,28 @@
             <section class="card">
               <div class="section-header">
                 <h2>Atendimentos</h2>
+                <p style="margin-bottom: 15px; color:#64748b;">
+  {{
+    userRole === 'secretario'
+      ? 'Visualizando todos os atendimentos da clínica'
+      : 'Visualizando apenas seus atendimentos'
+  }}
+</p>
                 <span class="muted">Histórico dos agendamentos</span>
               </div>
 
               <div v-if="lista.length" class="table-wrapper">
                 <table class="appointments-table">
                   <thead>
-                    <tr>
-                      <th>Paciente</th>
-                      <th>Data</th>
-                      <th>Horário</th>
+              <tr>
+                <th>Paciente</th>
+                  <th>Data</th>
+                    <th>Horário</th>
                       <th>Endereço</th>
-                      <th>Email</th>
-                    </tr>
-                  </thead>
+                        <th>Email</th>
+                    <th v-if="userRole === 'secretario'">Ações</th>
+                  </tr>
+                    </thead>
                   <tbody>
                     <tr v-for="a in lista" :key="a._id">
                       <td>{{ a.patientName || a.patient?.name || 'Paciente' }}</td>
@@ -318,6 +348,11 @@
                       <td>{{ formatOnlyTime(a.date) }}</td>
                       <td>{{ a.address || 'Não informado' }}</td>
                       <td>{{ a.patient?.email || 'Não disponível' }}</td>
+                      <td v-if="userRole === 'secretario'">
+                      <button class="danger-btn" @click="cancelar(a._id)">
+                      Cancelar
+                      </button>
+                      </td>
                     </tr>
                   </tbody>
                 </table>
@@ -558,6 +593,22 @@ export default {
         this.lista = []
       }
     },
+    async cancelar(id) {
+  if (!confirm('Deseja cancelar essa consulta?')) return
+
+  try {
+    await api.delete(`/appointments/${id}`, {
+      headers: {
+        Authorization: this.token
+      }
+    })
+
+    alert('Consulta cancelada com sucesso')
+    this.carregar()
+  } catch (error) {
+    alert(error.response?.data?.msg || 'Erro ao cancelar consulta')
+  }
+},
 
     formatDate(date) {
       return new Date(date).toLocaleString('pt-BR')
@@ -1063,5 +1114,18 @@ input[readonly] {
     flex-direction: column;
     align-items: flex-start;
   }
+}
+  .danger-btn {
+  border: none;
+  background: #dc2626;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.danger-btn:hover {
+  background: #b91c1c;
 }
 </style>
