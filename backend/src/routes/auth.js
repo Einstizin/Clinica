@@ -42,6 +42,52 @@ router.post('/register', async (req, res) => {
     });
   }
 });
+router.post('/login', async (req, res) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+
+    if (!user) {
+      return res.status(400).json({ msg: 'Usuário não encontrado' });
+    }
+
+    const valid = await bcrypt.compare(req.body.password, user.password);
+
+    if (!valid) {
+      return res.status(400).json({ msg: 'Senha incorreta' });
+    }
+
+    if (!user.emailVerified) {
+      return res.status(403).json({
+        msg: 'Verifique seu email antes de fazer login'
+      });
+    }
+
+    const token = jwt.sign(
+      {
+        id: user._id,
+        role: user.role,
+        email: user.email,
+        name: user.name
+      },
+      process.env.JWT_SECRET
+    );
+
+    return res.json({
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role
+      }
+    });
+  } catch (error) {
+    return res.status(500).json({
+      msg: 'Erro ao fazer login',
+      error: error.message
+    });
+  }
+});
 router.post('/verify-email-code', async (req, res) => {
   try {
     const { email, code } = req.body;
