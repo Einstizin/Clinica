@@ -558,14 +558,12 @@ export default {
   try {
     const dateISO = this.buildDate()
 
-    // 🌦️ CONSULTA CLIMA
     const clima = await api.get('/external/weather/' + dateISO)
 
     if (clima.data.rain) {
       alert('⚠️ Atenção: Há previsão de chuva no dia da consulta!')
     }
 
-    // 📅 CRIAR CONSULTA
     await api.post(
       '/appointments',
       {
@@ -582,11 +580,10 @@ export default {
 
     alert('Consulta agendada com sucesso!')
     this.carregar()
-
   } catch (error) {
     alert(error.response?.data?.msg || 'Erro ao agendar consulta')
   }
-},
+}
           {
             headers: {
               Authorization: this.token
