@@ -12,8 +12,6 @@ router.post('/', auth, async (req, res) => {
 
     const start = new Date(appointmentDate);
     const end = new Date(appointmentDate);
-
-    // intervalo de 1 hora para considerar conflito
     end.setHours(end.getHours() + 1);
 
     const existing = await Appointment.findOne({
@@ -33,18 +31,27 @@ router.post('/', auth, async (req, res) => {
       address: req.body.address
     });
 
-    res.json(appointment);
+    return res.json(appointment);
   } catch (error) {
-    res.status(500).json({ msg: 'Erro ao criar consulta', error: error.message });
+    return res.status(500).json({ msg: 'Erro ao criar consulta', error: error.message });
   }
 });
 
 router.get('/', auth, async (req, res) => {
   try {
-    const list = await Appointment.find().populate('patient');
-    res.json(list);
+    let appointments;
+
+    if (req.user.role === 'secretario') {
+      appointments = await Appointment.find().populate('patient');
+    } else {
+      appointments = await Appointment.find({
+        patient: req.user.id
+      }).populate('patient');
+    }
+
+    return res.json(appointments);
   } catch (error) {
-    res.status(500).json({ msg: 'Erro ao listar consultas', error: error.message });
+    return res.status(500).json({ msg: 'Erro ao listar consultas', error: error.message });
   }
 });
 
